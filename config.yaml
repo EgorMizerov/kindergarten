@@ -2,3 +2,8 @@
 server:
   host: "192.168.43.123"
   port: ":8000"
+
+# Google Cloud Platform Settings
+gcp:
+  bucket: "kindergarten-files"
+  profilePhotosPath: "profile-photos/"

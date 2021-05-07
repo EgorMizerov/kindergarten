@@ -5,6 +5,8 @@ import (
 	"github.com/EgorMizerov/kindergarten/internal/delivery/http"
 	"github.com/EgorMizerov/kindergarten/internal/repository"
 	"github.com/EgorMizerov/kindergarten/internal/service"
+	"github.com/EgorMizerov/kindergarten/internal/storage"
+	"github.com/EgorMizerov/kindergarten/pkg/auth"
 	"github.com/EgorMizerov/kindergarten/pkg/database"
 	pkgserver "github.com/EgorMizerov/kindergarten/pkg/server"
 	"github.com/joho/godotenv"
@@ -30,14 +32,23 @@ func Run() { // load environment
 
 	// connect to MongoDB
 	query := os.Getenv("MONGODB_CONNECTION_QUERY")
-	client, err := database.ConnectClient(query)
+	mongoClient, err := database.ConnectClient(query)
 	if err != nil {
 		log.Fatalf("error connection to mongodb: %s", err.Error())
 	}
 
+	// initializing google cloud storage
+	storageClient := storage.NewGoogleStorage(
+		os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"),
+		viper.GetString("gcp.bucket"),
+		viper.GetString("gcp.profilePhotosPath"))
+
+	// initializing JWT manager
+	tokenManager := auth.NewManager("qwerty", "kindergarten")
+
 	// initializing layers
-	repo := repository.NewRepository(client)
-	serv := service.NewService(repo)
+	repo := repository.NewRepository(mongoClient.Database("kindergarten"))
+	serv := service.NewService(repo, storageClient, tokenManager)
 	hand := http.NewHandler(serv)
 
 	server := new(pkgserver.Server)
