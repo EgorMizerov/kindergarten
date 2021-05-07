@@ -49,7 +49,7 @@ func Run() { // load environment
 	// initializing layers
 	repo := repository.NewRepository(mongoClient.Database("kindergarten"))
 	serv := service.NewService(repo, storageClient, tokenManager)
-	hand := http.NewHandler(serv)
+	hand := http.NewHandler(serv, tokenManager)
 
 	server := new(pkgserver.Server)
 

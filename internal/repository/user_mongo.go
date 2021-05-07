@@ -33,7 +33,7 @@ func (r *UserMongo) CreateUser(ctx context.Context, domain domain.User) (string,
 		return "", err
 	}
 
-	objId, err := convertInsertedIDToString(res.InsertedID)
+	objId, err := ConvertInsertedIDToString(res.InsertedID)
 	if err != nil {
 		return "", errors.New("error converting InsertedID to ObjectID")
 	}
@@ -44,16 +44,39 @@ func (r *UserMongo) CreateUser(ctx context.Context, domain domain.User) (string,
 func (r *UserMongo) GetUserById(ctx context.Context, id string) (domain.User, error) {
 	objId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return domain.User{}, err
+		return domain.User{}, errors.New("invalid id")
 	}
 
 	res := r.coll.FindOne(ctx, bson.M{"_id": objId})
 	if res.Err() != nil {
-		return domain.User{}, nil
+		if res.Err().Error() == "mongo: no documents in result" {
+			return domain.User{}, errors.New("user is not found")
+		}
+
+		return domain.User{}, res.Err()
 	}
 
 	var user domain.User
 	err = res.Decode(&user)
+
+	return user, err
+}
+
+func (r *UserMongo) GetUserByEmail(ctx context.Context, email string) (domain.User, error) {
+	res := r.coll.FindOne(ctx, bson.M{"email": email})
+	if res.Err() != nil {
+		if res.Err().Error() == "mongo: no documents in result" {
+			return domain.User{}, errors.New("user is not found")
+		}
+
+		return domain.User{}, res.Err()
+	}
+
+	var user domain.User
+	err := res.Decode(&user)
+	if err != nil {
+		return domain.User{}, err
+	}
 
 	return user, err
 }
