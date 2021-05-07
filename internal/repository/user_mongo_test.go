@@ -12,6 +12,9 @@ import (
 	"testing"
 )
 
+var query = "mongodb://mongo:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false"
+var dbname = "local"
+
 func testUsersData(ctx context.Context, coll *mongo.Collection) ([]string, error) {
 	var ids []string
 	data := []domain.User{
@@ -41,13 +44,13 @@ func TestUserMongo_GetUserByEmail(t *testing.T) {
 	ctx := context.Background()
 
 	// connect to mongodb
-	mongoClient, err := database.ConnectClient("mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false")
+	mongoClient, err := database.ConnectClient(query)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// create collection
-	coll := mongoClient.Database("test").Collection("users")
+	coll := mongoClient.Database(dbname).Collection("users")
 	defer coll.Drop(ctx)
 
 	// insert test data
@@ -89,13 +92,13 @@ func TestUserMongo_GetUserById(t *testing.T) {
 	ctx := context.Background()
 
 	// connect to mongodb
-	mongoClient, err := database.ConnectClient("mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false")
+	mongoClient, err := database.ConnectClient(query)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// create collection
-	coll := mongoClient.Database("test").Collection("users")
+	coll := mongoClient.Database(dbname).Collection("users")
 	//defer coll.Drop(ctx)
 
 	// insert test data

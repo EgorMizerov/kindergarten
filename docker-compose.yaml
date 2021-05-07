@@ -1,0 +1,16 @@
+version: '3.0'
+
+services:
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 27018:27017
+
+  app:
+    depends_on:
+      - mongo
+    build: .
+    command: go test ./... && ./main
+    ports:
+    - 8000:8000

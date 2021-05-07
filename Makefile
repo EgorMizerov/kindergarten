@@ -5,3 +5,6 @@ docker:
 	docker build -t kindergarten .
 	docker run --name=myapp --rm -p 8000:8000 kindergarten
 	docker rmi kindergarten
+
+compose:
+	docker-compose up --build app
