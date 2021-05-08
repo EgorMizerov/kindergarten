@@ -22,10 +22,13 @@ func NewHandler(service *service.Service, manager auth.TokenManager) *Handler {
 func (h *Handler) Init() *gin.Engine {
 	router := gin.New()
 	router.Use(gin.Logger())
+	router.Use(h.corsMiddleware())
+	router.Use(h.optionMiddleware())
 
 	handlerV1 := v1.NewHandler(h.service, h.tokenManager)
 	api := router.Group("/api")
 	{
+		api.Use(h.mediaType())
 		handlerV1.InitAPIV1(api)
 	}
 
